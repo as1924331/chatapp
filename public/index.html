@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    
+    <title>Let's Chats</title>
+</head>
+
+<body>
+    <nav class="logo">
+        <!-- <div id="box2"></div> -->
+        <img src="/logo.jpg" alt="">
+        <h1>Let's Chats</h1>
+        <!-- <div id="box"></div> -->
+    </nav>
+    <div class="container"></div>
+    <div class="send">
+        <form action="#" id="send-container">
+            <input type="text" name="text" id="mymessage" placeholder="Message">
+            <button class="btn" type="submit">Send</button>
+        </form>
+    </div>
+<!-- ################################################# SOCKET IO  SETUP HUA HAI ############################### -->
+
+    <script  src="/socket.io/socket.io.js"></script>
+    <script  >
+        var socket = io('http://localhost:8000');
+
+ // ##########################IN THIS AREA WE WILL EXTRACT THE ID AND CLASS FROM THE HTML#######################
+    // ######################adding audio###############################
+        var audio= new Audio('tring.mp3');
+        const form = document.getElementById('send-container');
+        const messageInput = document.getElementById('mymessage');
+        const messageContainer = document.querySelector('.container');
+
+
+
+        const append = (message, position) => {
+            const messageElement = document.createElement('div');
+            messageElement.innerText = message;
+            messageElement.classList.add('message');
+            messageElement.classList.add(position);
+            messageContainer.append(messageElement);
+            if(position == 'left'){
+                audio.play()
+            }
+
+        }
+
+
+// #############################UP TO THISSSS#####################################################################
+// ##########################addEventListener########################################
+        form.addEventListener('submit',(e)=>{
+            e.preventDefault();
+            const message = messageInput.value;
+            append(`${name} : ${message}` , 'right');
+            socket.emit('send',message);
+            messageInput.value =''
+        })
+// #######################HERE WE ASKED THE USER HIS NAME ###################################################
+         
+        // const name = prompt("Enter the name to join the chat")
+
+        let name;
+        do{
+            name=prompt("Enter the  Name to join the chat")
+        }while(!name);
+        socket.emit('new-user-joined', name);
+
+        socket.on('user-joined', name => {
+            append(`${name} : joined the chat  `, 'right');
+        })
+        socket.on('receive',data => {
+            append(`${data.name}: ${data.message}` , 'left')
+            // document.getElementById("box").innerHTML= `${data.name} is online` 
+        })
+        socket.on('left',name => {
+            append(`${name}: left the chat` , 'left')
+            // document.getElementById("box2").innerHTML= `${name} is ofline` 
+        })
+        // #####################################################up to thisss####################################
+
+    </script>
+</body>
+
+</html>
